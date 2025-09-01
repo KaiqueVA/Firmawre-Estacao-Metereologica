@@ -1,0 +1,27 @@
+version: "3.9"
+
+
+
+services:
+  idf:
+    image: espressif/idf:release-v5.5   # versão estável mais recente
+    container_name: esp-idf
+    working_dir: /work
+    tty: true
+    stdin_open: true
+
+    # Se quiser evitar arquivos como root no host:
+    user: "${UID:-1000}:${GID:-1000}"
+
+    # Mapeia sua porta serial estável
+    devices:
+      - "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0:/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"
+
+    # Volumes persistentes para cache e projeto
+    volumes:
+      - ./:/work
+      - ${HOME}/.espressif:/root/.espressif
+      - ${HOME}/.cache/ccache:/root/.cache/ccache
+
+    environment:
+      - IDF_CCACHE_ENABLE=1
