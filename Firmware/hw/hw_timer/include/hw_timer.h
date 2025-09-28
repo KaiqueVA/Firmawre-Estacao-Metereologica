@@ -14,8 +14,12 @@ Description: Header file for wind_sensors.c
 
 
 void IRAM_ATTR hw_timer0_callback(void);
+void IRAM_ATTR hw_timer1_callback(void);
+void IRAM_ATTR hw_timer2_callback(void);
+void IRAM_ATTR hw_timer3_callback(void);
 
-void hw_timer_init(uint8_t timer_num, bool auto_reload);
+
+void hw_timer_init(uint8_t timer_num, bool auto_reload, uint64_t timer_window_us);
 void hw_timer_start(uint8_t timer_num);
 void hw_timer_stop(uint8_t timer_num);
 void hw_timer_disarm(uint8_t timer_num);

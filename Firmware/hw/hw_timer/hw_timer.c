@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "hw_timer.h"
+#include "esp_log.h"
 /*
 ==============================================================================
  Private Macros
@@ -7,7 +8,6 @@
  */
 #define TIMER_RES_HZ    1000000
 #define T_WINDOW_US     10000
-#define ALARM_TICKS(us) (us)
 /*
 ==============================================================================
 ==============================================================================
@@ -32,6 +32,9 @@ timer_data_t timer_data[4];
 */
 
 void __attribute__((weak)) hw_timer0_callback(void) { return; } //callback para complementar o timer 0
+void __attribute__((weak)) hw_timer1_callback(void) { return; } //callback para complementar o timer 1
+void __attribute__((weak)) hw_timer2_callback(void) { return; } //callback para complementar o timer 2
+void __attribute__((weak)) hw_timer3_callback(void) { return; } //callback para complementar o timer 3
 
 bool IRAM_ATTR hw_timer0_isr_callback(gptimer_handle_t t, const gptimer_alarm_event_data_t *edata, void *user_ctx) { 
     timer_data[0].flag_started = false;
@@ -39,8 +42,26 @@ bool IRAM_ATTR hw_timer0_isr_callback(gptimer_handle_t t, const gptimer_alarm_ev
     return false; 
 }
 
+bool IRAM_ATTR hw_timer1_isr_callback(gptimer_handle_t t, const gptimer_alarm_event_data_t *edata, void *user_ctx) { 
+    timer_data[1].flag_started = false;
+    hw_timer1_callback();
+    return false; 
+}
 
-void hw_timer_init(uint8_t timer_num, bool auto_reload) {
+bool IRAM_ATTR hw_timer2_isr_callback(gptimer_handle_t t, const gptimer_alarm_event_data_t *edata, void *user_ctx) { 
+    timer_data[2].flag_started = false;
+    hw_timer2_callback();
+    return false; 
+}
+
+bool IRAM_ATTR hw_timer3_isr_callback(gptimer_handle_t t, const gptimer_alarm_event_data_t *edata, void *user_ctx) { 
+    timer_data[3].flag_started = false;
+    hw_timer3_callback();
+    return false; 
+}
+
+
+void hw_timer_init(uint8_t timer_num, bool auto_reload, uint64_t timer_window_us) {
     timer_data[timer_num].flag_started = false;
     gptimer_config_t cfg = {
         .clk_src = GPTIMER_CLK_SRC_DEFAULT,
@@ -52,15 +73,33 @@ void hw_timer_init(uint8_t timer_num, bool auto_reload) {
 
     gptimer_alarm_config_t alarm_config = {
         .reload_count = 0,
-        .alarm_count = ALARM_TICKS(T_WINDOW_US),
+        .alarm_count = timer_window_us,
         .flags.auto_reload_on_alarm = auto_reload,
     };
 
     ESP_ERROR_CHECK(gptimer_set_alarm_action(timer_data[timer_num].timer, &alarm_config));
 
-    gptimer_event_callbacks_t cbs = {
-        .on_alarm = hw_timer0_isr_callback,
+    gptimer_event_callbacks_t cbs;
+    switch(timer_num) {
+        case 0: 
+            cbs.on_alarm = hw_timer0_isr_callback;
+            break;
+        
+        case 1: 
+            cbs.on_alarm = hw_timer1_isr_callback;
+            break;
+        
+        case 2: 
+            cbs.on_alarm = hw_timer2_isr_callback;
+            break;
+        case 3: 
+            cbs.on_alarm = hw_timer3_isr_callback;
+            break;
+        default:
+            ESP_LOGE("HW_TIMER", "Invalid timer number");
+            break;
     };
+    ESP_ERROR_CHECK(gptimer_register_event_callbacks(timer_data[timer_num].timer, &cbs, NULL));
 
     ESP_ERROR_CHECK(gptimer_register_event_callbacks(timer_data[timer_num].timer, &cbs, NULL));
 
