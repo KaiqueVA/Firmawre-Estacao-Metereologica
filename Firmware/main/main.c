@@ -7,11 +7,5 @@
 void app_main(void)
 {   
 
-    init_wind_sensors();
-    
-    while(1)
-    {
-        get_count_34();
-        vTaskDelay(10/portTICK_PERIOD_MS);
-    }
+    init_wind_sensors();    
 }
