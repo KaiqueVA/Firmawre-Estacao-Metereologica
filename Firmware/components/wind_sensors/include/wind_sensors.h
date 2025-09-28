@@ -16,6 +16,6 @@ typedef struct{
 
 
 void init_wind_sensors(void);
-void get_count_34(void);
+
 
 #endif /* WIND_SENSORS_H_ */
