@@ -11,8 +11,8 @@ TaskHandle_t task_data_handle = NULL;
 uint8_t volatile flag_interrupt_34 = 0;
 uint8_t volatile flag_interrupt_35 = 0;
 uint8_t volatile flag_timer0 = 0;
-bool interrupt_34_falling_edge = false;
-bool interrupt_34_rising_edge = false;
+bool interrupt_35_falling_edge = false;
+bool interrupt_35_rising_edge = false;
 
 uint32_t count_34 = 0;
 uint32_t count_35 = 0;
@@ -39,8 +39,8 @@ void task_data_processing(void *pvArgs)
     while(1)
     {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        ESP_LOGI("WIND_SENSOR", "Wind Speed: %.2f km/h", (count_34 * 2.4));
-        count_34 = 0;
+        ESP_LOGI("WIND_SENSOR", "Wind Speed: %.2f km/h", (count_35 * 2.4));
+        count_35 = 0;
     }
 }
 
@@ -72,31 +72,31 @@ void hw_timer2_callback(void)
 }
 
 
-void IRAM_ATTR isr_gpio_isr_34(void *arg)
+void IRAM_ATTR isr_gpio_isr_35(void *arg)
 {
     uint8_t level = gpio_get_level((uint32_t)arg);
 
     if(level == 1)
-        interrupt_34_rising_edge = true;
+        interrupt_35_rising_edge = true;
     else{
-        interrupt_34_falling_edge = true;
+        interrupt_35_falling_edge = true;
         hw_timer_start(0);
     }
-    if(interrupt_34_rising_edge && interrupt_34_falling_edge)
+    if(interrupt_35_rising_edge && interrupt_35_falling_edge)
     {
         if(flag_timer0){
-            count_34++;
+            count_35++;
         }
         hw_timer_stop(0);
         flag_timer0 = 0;
-        interrupt_34_rising_edge = false;
-        interrupt_34_falling_edge = false;
+        interrupt_35_rising_edge = false;
+        interrupt_35_falling_edge = false;
     }
     
 }
 
-void IRAM_ATTR isr_gpio_isr_35(void *arg)
+void IRAM_ATTR isr_gpio_isr_34(void *arg)
 {
-    count_35 = (uint32_t)arg;
-    flag_interrupt_35 = 1;
+    count_34 = (uint32_t)arg;
+    flag_interrupt_34 = 1;
 }
