@@ -26,3 +26,6 @@ services:
 
     environment:
       - IDF_CCACHE_ENABLE=1
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
+      - LANGUAGE=C

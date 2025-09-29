@@ -13,5 +13,7 @@
     }
   },
   "postCreateCommand": "bash -lc 'grep -q export.sh ~/.bashrc || echo \". $IDF_PATH/export.sh\" >> ~/.bashrc'",
-  "postStartCommand": "bash -lc '. $IDF_PATH/export.sh || true'"
+  "postStartCommand": "bash -lc 'export LANG=C.UTF-8 LC_ALL=C.UTF-8; grep -q LANG ~/.bashrc || echo \"export LANG=C.UTF-8\" >> ~/.bashrc; grep -q LC_ALL ~/.bashrc || echo \"export LC_ALL=C.UTF-8\" >> ~/.bashrc; . $IDF_PATH/export.sh || true'"
+  
+  
 }
