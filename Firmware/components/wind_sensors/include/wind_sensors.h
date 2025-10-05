@@ -12,6 +12,7 @@ Description: Header file for wind_sensors.c
 typedef struct{
     float wind_speed_ms;
     float wind_speed_kmh;
+    float wind_direction;
 }wind_sensor_data_t;
 
 
