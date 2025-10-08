@@ -107,6 +107,8 @@ void task_wind_direction(void *pvArgs)
             }
         }
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        if(count_sampling == 0)
+            count_sampling = 1;
         adc_value = adc_oversampling/count_sampling;
         if      (adc_value >= 200  && adc_value <= 300)  degree = 270.0f;
         else if (adc_value >= 400  && adc_value <= 500)  degree = 315.0f;
