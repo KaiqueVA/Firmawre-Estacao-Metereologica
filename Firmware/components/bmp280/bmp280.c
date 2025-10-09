@@ -72,7 +72,6 @@ uint32_t bmp280_compensate_P(int32_t adc_P);
 
 esp_err_t bmp280_init(void)
 {
-    hw_i2c_init();
     bmp280_i2c.data = NULL;
     bmp280_i2c.length = 0;
     esp_err_t ret;

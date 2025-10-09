@@ -51,9 +51,6 @@ void task_rain_gauge(void *pvArgs);
 
 void init_wind_rain_sensors(void)
 {
-    hw_gpio_init();
-    init_hw_adc();
-
     hw_timer_init(0, false, 1000*10); //10mS wind speed
     hw_timer_init(1, false, 1000 * 20); //20mS Rain gauge
     hw_timer_init(2, true, 1000 * 1000); //1S
