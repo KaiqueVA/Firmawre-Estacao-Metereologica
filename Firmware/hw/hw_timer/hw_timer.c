@@ -101,8 +101,6 @@ void hw_timer_init(uint8_t timer_num, bool auto_reload, uint64_t timer_window_us
     };
     ESP_ERROR_CHECK(gptimer_register_event_callbacks(timer_data[timer_num].timer, &cbs, NULL));
 
-    ESP_ERROR_CHECK(gptimer_register_event_callbacks(timer_data[timer_num].timer, &cbs, NULL));
-
     ESP_ERROR_CHECK(gptimer_enable(timer_data[timer_num].timer));
 }
 
