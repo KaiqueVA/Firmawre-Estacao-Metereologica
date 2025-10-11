@@ -3,7 +3,10 @@
 #include "hw_i2c.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
 #include "string.h"
+#include "data_processing.h"
 
 #define ADDR_BMP280 0x76
 // Identificação e Reset
@@ -67,7 +70,7 @@ esp_err_t bmp280_ctrl_meas(void);
 esp_err_t bmp280_config(void);
 int32_t bmp280_compensate_T(int32_t adc_T);
 uint32_t bmp280_compensate_P(int32_t adc_P);
-
+void task_bmp280(void *pvArgs);
 
 
 esp_err_t bmp280_init(void)
@@ -112,7 +115,7 @@ esp_err_t bmp280_init(void)
     }
 
     ESP_LOGI("BMP280", "BMP280 initialized.");
-
+    xTaskCreate(task_bmp280, "task_bmp280", 4096, NULL, 5, &task_bmp280_handle);
     return ESP_OK;
 
 }
@@ -132,11 +135,24 @@ esp_err_t bmp280_read_data(bmp280_data_t *data)
 
     data->temperature = bmp280_compensate_T(adc_t)/100.0;
     data->pressure = bmp280_compensate_P(adc_p)/25600.0;
-    ESP_LOGI("BMP280", "Temperature: %.2f C, Pressure: %.2f hPa", data->temperature, data->pressure);
     return ret;
 
 }
 
+void task_bmp280(void *pvArgs)
+{
+    bmp280_data_t sensor_data;
+    ESP_LOGI("BMP280", "Task BMP280 started");
+    while(1)
+    {
+        bmp280_read_data(&sensor_data);
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        xQueueSend(q_bmp280_data, &sensor_data, pdMS_TO_TICKS(100));
+        xEventGroupSetBits(eg_sync, BMP280_BIT);
+
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
 
 
 esp_err_t bmp280_get_id(void)

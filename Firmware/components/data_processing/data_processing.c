@@ -3,6 +3,7 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "hw_timer.h"
+#include "bmp280.h"
 
 //Variaveis externas glboais
 EventGroupHandle_t eg_sync = NULL;
@@ -10,10 +11,12 @@ EventGroupHandle_t eg_sync = NULL;
 QueueHandle_t q_wind_speed;
 QueueHandle_t q_wind_direction;
 QueueHandle_t q_rain_gauge;
+QueueHandle_t q_bmp280_data;
 
 TaskHandle_t task_wind_direction_handle = NULL;
 TaskHandle_t task_wind_speed_handle = NULL;
 TaskHandle_t task_rain_gauge_handle = NULL;
+TaskHandle_t task_bmp280_handle = NULL;
 
 void task_data_processing(void *pvArgs);
 
@@ -27,8 +30,9 @@ esp_err_t init_data_processing(void)
     q_wind_speed = xQueueCreate(1, sizeof(float));
     q_wind_direction = xQueueCreate(1, sizeof(float));
     q_rain_gauge = xQueueCreate(1, sizeof(float));  
-    
-    if (!q_wind_speed || !q_wind_direction || !q_rain_gauge) {
+    q_bmp280_data = xQueueCreate(1, sizeof(bmp280_data_t));
+
+    if (!q_wind_speed || !q_wind_direction || !q_rain_gauge || !q_bmp280_data) {
         ESP_LOGE("DATA_PROCESSING", "Failed to create queues");
         return ESP_FAIL;
     }
@@ -42,6 +46,7 @@ void task_data_processing(void *pvArgs)
 {
     float wind_speed = 0, wind_direction = 0, rain_gauge = 0;
     BaseType_t status;
+    bmp280_data_t sensor_data;
     ESP_LOGI("DATA_PROCESSING", "Task data processing started");
     
     while(1)
@@ -68,9 +73,14 @@ void task_data_processing(void *pvArgs)
         if (status != pdTRUE) {
             ESP_LOGW("DATA_PROCESSING", "Failed to receive rain gauge");
         }
-        
-        ESP_LOGI("DATA_PROCESSING", "Wind Speed: %.2f km/h | %.1f degree | Rain Gauge: %.4fmm", 
-                wind_speed, wind_direction, rain_gauge);
+
+        status = xQueueReceive(q_bmp280_data, &sensor_data, pdMS_TO_TICKS(100));
+        if (status != pdTRUE) {
+            ESP_LOGW("DATA_PROCESSING", "Failed to receive BMP280 data");
+        }
+
+        ESP_LOGI("DATA_PROCESSING", "Wind Speed: %.2f km/h | %.1f degree | Rain Gauge: %.4fmm | BMP280: %.2f hPa",
+                wind_speed, wind_direction, rain_gauge, sensor_data.pressure);
                 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -91,6 +101,10 @@ void hw_timer2_callback(void) //timer 1s
     
     if (task_rain_gauge_handle != NULL) {
         vTaskNotifyGiveFromISR(task_rain_gauge_handle, &xHigherPriorityTaskWoken);
+    }
+
+    if (task_bmp280_handle != NULL) {
+        vTaskNotifyGiveFromISR(task_bmp280_handle, &xHigherPriorityTaskWoken);
     }
     
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);

@@ -13,7 +13,7 @@
 #define RAIN_GAUGE_BIT      (1<<2)
 #define BMP280_BIT          (1<<3)
 
-#define DONE_ALL (WIND_SPEED_BIT | WIND_DIRECTION_BIT | RAIN_GAUGE_BIT)
+#define DONE_ALL (WIND_SPEED_BIT | WIND_DIRECTION_BIT | RAIN_GAUGE_BIT | BMP280_BIT)
 
 extern EventGroupHandle_t eg_sync;
 
@@ -24,6 +24,7 @@ extern EventGroupHandle_t eg_sync;
 extern QueueHandle_t q_wind_speed;
 extern QueueHandle_t q_wind_direction;
 extern QueueHandle_t q_rain_gauge;
+extern QueueHandle_t q_bmp280_data;
 
 //=======================================================================
 
@@ -32,6 +33,7 @@ extern QueueHandle_t q_rain_gauge;
 extern TaskHandle_t task_wind_direction_handle;
 extern TaskHandle_t task_wind_speed_handle;
 extern TaskHandle_t task_rain_gauge_handle;
+extern TaskHandle_t task_bmp280_handle;
 
 //=======================================================================
 
