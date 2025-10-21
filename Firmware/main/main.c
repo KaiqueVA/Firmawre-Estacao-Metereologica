@@ -6,6 +6,7 @@
 #include "hw_common.h"
 #include "data_processing.h"
 #include "bmp280.h"
+#include "DHT22.h"
 
 
 void app_main(void)
@@ -13,5 +14,6 @@ void app_main(void)
     hw_common_init();
     bmp280_init();
     init_wind_rain_sensors();
+    dht_init();
     init_data_processing();
 }
