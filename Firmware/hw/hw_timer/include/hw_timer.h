@@ -24,6 +24,7 @@ void hw_timer_start(uint8_t timer_num);
 void hw_timer_stop(uint8_t timer_num);
 void hw_timer_disarm(uint8_t timer_num);
 void hw_timer_del(uint8_t timer_num);
+uint64_t hw_timer_get_time_us(void);
 
 
 

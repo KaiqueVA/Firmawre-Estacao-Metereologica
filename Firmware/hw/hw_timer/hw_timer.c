@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "hw_timer.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 /*
 ==============================================================================
  Private Macros
@@ -131,3 +132,7 @@ void hw_timer_del(uint8_t timer_num)
     timer_data[timer_num].flag_started = false;
 }
 
+uint64_t hw_timer_get_time_us(void)
+{
+    return esp_timer_get_time();
+}
