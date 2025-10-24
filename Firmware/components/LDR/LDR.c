@@ -35,7 +35,6 @@ void LDR_task(void *pvArgs)
         }
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         xQueueSend(q_ldr_data, &lux, pdMS_TO_TICKS(100));
-        ESP_LOGI(TAG, "SETANDO BIT");
         xEventGroupSetBits(eg_sync, LDR_BIT);
         vTaskDelay(pdMS_TO_TICKS(10));
 
