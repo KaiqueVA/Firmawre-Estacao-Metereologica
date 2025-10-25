@@ -8,12 +8,14 @@
 #include "bmp280.h" 
 #include "DHT22.h"
 #include "LDR.h"
+#include "MAX17043.h"
 
 
 void app_main(void)
 {   
     hw_common_init();
     bmp280_init();
+    init_MAX17043();
     init_wind_rain_sensors();
     dht_init();
     LDR_init();
