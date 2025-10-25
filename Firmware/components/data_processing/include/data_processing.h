@@ -14,8 +14,9 @@
 #define BMP280_BIT          (1<<3)
 #define DHT22_BIT           (1<<4)
 #define LDR_BIT             (1<<5)
+#define MAX17043_BIT        (1<<6)
 
-#define DONE_ALL (WIND_SPEED_BIT | WIND_DIRECTION_BIT | RAIN_GAUGE_BIT | BMP280_BIT | DHT22_BIT | LDR_BIT)
+#define DONE_ALL (WIND_SPEED_BIT | WIND_DIRECTION_BIT | RAIN_GAUGE_BIT | BMP280_BIT | DHT22_BIT | LDR_BIT | MAX17043_BIT)
 
 extern EventGroupHandle_t eg_sync;
 
@@ -29,6 +30,7 @@ extern QueueHandle_t q_rain_gauge;
 extern QueueHandle_t q_bmp280_data;
 extern QueueHandle_t q_dht22_data;
 extern QueueHandle_t q_ldr_data;
+extern QueueHandle_t q_max17043_data;
 
 //=======================================================================
 
@@ -40,6 +42,7 @@ extern TaskHandle_t task_rain_gauge_handle;
 extern TaskHandle_t task_bmp280_handle;
 extern TaskHandle_t task_dht_handle;
 extern TaskHandle_t task_ldr_handle;
+extern TaskHandle_t task_max17043_handle;
 
 //=======================================================================
 

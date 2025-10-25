@@ -5,6 +5,7 @@
 #include "hw_timer.h"
 #include "bmp280.h"
 #include "DHT22.h"
+#include "MAX17043.h"
 
 //Variaveis externas glboais
 EventGroupHandle_t eg_sync = NULL;
@@ -15,6 +16,7 @@ QueueHandle_t q_rain_gauge;
 QueueHandle_t q_bmp280_data;
 QueueHandle_t q_dht22_data;
 QueueHandle_t q_ldr_data;
+QueueHandle_t q_max17043_data;
 
 TaskHandle_t task_wind_direction_handle = NULL;
 TaskHandle_t task_wind_speed_handle = NULL;
@@ -22,6 +24,7 @@ TaskHandle_t task_rain_gauge_handle = NULL;
 TaskHandle_t task_bmp280_handle = NULL;
 TaskHandle_t task_dht_handle = NULL;
 TaskHandle_t task_ldr_handle = NULL;
+TaskHandle_t task_max17043_handle = NULL;
 
 void task_data_processing(void *pvArgs);
 
@@ -43,8 +46,9 @@ esp_err_t init_data_processing(void)
     q_bmp280_data = xQueueCreate(1, sizeof(bmp280_data_t));
     q_dht22_data = xQueueCreate(1, sizeof(DHT22_data_t));
     q_ldr_data = xQueueCreate(1, sizeof(float));
+    q_max17043_data = xQueueCreate(1, sizeof(MAX17043_Data));
 
-    if (!q_wind_speed || !q_wind_direction || !q_rain_gauge || !q_bmp280_data || !q_dht22_data || !q_ldr_data) {
+    if (!q_wind_speed || !q_wind_direction || !q_rain_gauge || !q_bmp280_data || !q_dht22_data || !q_ldr_data || !q_max17043_data) {
         ESP_LOGE("DATA_PROCESSING", "Failed to create queues");
         return ESP_FAIL;
     }
@@ -60,6 +64,7 @@ void task_data_processing(void *pvArgs)
     BaseType_t status;
     bmp280_data_t sensor_data;
     DHT22_data_t dht_data;
+    MAX17043_Data max17043_data;
     ESP_LOGI("DATA_PROCESSING", "Task data processing started");
     
     while(1)
@@ -102,8 +107,12 @@ void task_data_processing(void *pvArgs)
             ESP_LOGW("DATA_PROCESSING", "Failed to receive LDR data");
         }
 
-        ESP_LOGI("DATA_PROCESSING", "Wind Speed: %.2f km/h | %.1f degree | Rain Gauge: %.4fmm | BMP280: %.2f hPa | DHT22: Temp %.2f C, Hum %d%% | LDR: %.2f Lux",
-                wind_speed, wind_direction, rain_gauge, sensor_data.pressure, dht_data.temperature/10.0, dht_data.humidity/10, ldr_value);
+        status = xQueueReceive(q_max17043_data, &max17043_data, pdMS_TO_TICKS(100));
+        if (status != pdTRUE) {
+            ESP_LOGW("DATA_PROCESSING", "Failed to receive MAX17043 data");
+        }
+
+        ESP_LOGI("DATA_PROCESSING", "Wind Speed: %.2f km/h | %.1f degree | Rain Gauge: %.4fmm | BMP280: %.2f hPa | DHT22: Temp %.2f C, Hum %d%% | LDR: %.2f Lux | MAX17043: %.3f V, %.2f %%", wind_speed, wind_direction, rain_gauge, sensor_data.pressure, dht_data.temperature/10.0, dht_data.humidity/10, ldr_value, max17043_data.voltage, max17043_data.soc);
 
         vTaskDelay(pdMS_TO_TICKS(10));
     }
@@ -136,6 +145,10 @@ void hw_timer2_callback(void) //timer 1s
 
     if (task_ldr_handle != NULL) {
         vTaskNotifyGiveFromISR(task_ldr_handle, &xHigherPriorityTaskWoken);
+    }
+
+    if (task_max17043_handle != NULL) {
+        vTaskNotifyGiveFromISR(task_max17043_handle, &xHigherPriorityTaskWoken);
     }
     
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
