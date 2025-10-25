@@ -1,3 +1,5 @@
+//O firmware foi baseado no exemplo do esp-idf para o DHT22
+
 #include <stdio.h>
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
