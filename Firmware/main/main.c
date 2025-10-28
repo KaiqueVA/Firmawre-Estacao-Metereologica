@@ -9,10 +9,13 @@
 #include "DHT22.h"
 #include "LDR.h"
 #include "MAX17043.h"
+#include "wifi_manager.h"
 
 
 void app_main(void)
 {   
+    ESP_ERROR_CHECK(wifi_manager_init(NULL));
+    ESP_ERROR_CHECK(wifi_manager_start());
     hw_common_init();
     bmp280_init();
     init_MAX17043();
