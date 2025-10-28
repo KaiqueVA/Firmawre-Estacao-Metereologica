@@ -1,0 +1,33 @@
+menu "REDE > Wi-Fi"
+
+config WIFI_DEFAULT_MODE
+    int "Modo padrão"
+    range 0 2
+    default 1
+    help
+        0=AP, 1=STA, 2=APP
+config WIFI_SSID
+    string "SSID"
+    default "WeatherStation-WiFi"
+    help
+        SSID da rede Wi-Fi
+
+config WIFI_PASSWORD
+    string "Senha"
+    default "WS-PASSWORD"
+    help
+        Senha da rede Wi-Fi
+
+config WIFI_AP_SSID
+    string "SSID do AP"
+    default "WeatherStation-AP"
+    help
+        SSID do ponto de acesso (AP)
+
+config WIFI_AP_PASSWORD
+    string "Senha do AP"
+    default "WS-AP-PASSWORD"
+    help
+        Senha do ponto de acesso (AP)
+
+endmenu
